@@ -10,6 +10,8 @@ defmodule AParser do
 
   def parse_stuff(), do: parse(@stuff)
 
+  def parse_stuff2(), do: parse2(@stuff)
+
   def parse(stuff) do
     first = Lazy.new(f: fn(x) -> 
       {count, rest} = get_count(x)
@@ -20,6 +22,17 @@ defmodule AParser do
       {second, rest} = do_parse(count, rest)
       {acc, second, rest}
     end, args: [first])
+  end
+
+  def parse2(stuff) do
+    Stream.unfold({[:first, :second], stuff}, 
+      fn(nil) -> nil;
+        ({[], rest}) -> {rest, nil};
+        ({[_|steps], rest}) -> 
+          {count, rest} = get_count(rest)
+          {yield, rest} = do_parse(count, rest)
+          {yield, {steps, rest}}
+      end)
   end
 
   defp get_count(stuff) do
